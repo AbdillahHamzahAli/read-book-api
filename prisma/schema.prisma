@@ -1,47 +1,78 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
-  id    Int @id @default(autoincrement())
-  email String @unique @db.VarChar(100)
-  password String @db.VarChar(100)
-  name  String?
-
-  role Role  @default(USER)
-  posts Post[]
+  id          String      @id @default(uuid())
+  username    String      @unique
+  email       String      @unique
+  password    String
+  role        Role        @default(USER)
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+  userBooks   UserBook[]
 
   @@map("users")
 }
 
-model Post {
-  id    Int @id @default(autoincrement())
-  title String @db.VarChar(255)
-  slug  String @unique @db.VarChar(255)
-  thumbnail String? @db.VarChar(255) 
-  content String @db.Text
-  published Boolean @default(false)
+model Book {
+  id              String      @id @default(uuid())
+  title           String
+  author          String
+  coverImageUrl   String?     @map("cover_image_url")
+  totalPages      Int?        @map("total_pages")
+  isbn            String?     @unique
+  publishedDate   DateTime?   @map("published_date")
+  genre           String?
+  description     String?
+  createdAt       DateTime    @default(now()) @map("created_at")
+  updatedAt       DateTime    @updatedAt @map("updated_at")
+  userBooks       UserBook[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  authorId Int
-  author User @relation(fields: [authorId], references: [id])
-
-  @@map("posts")
+  @@map("books")
 }
 
-enum Role{
-  ADMIN
+model UserBook {
+  id              String            @id @default(uuid())
+  userId          String            @map("user_id")
+  bookId          String            @map("book_id")
+  status          String            @default("unread")
+  startDate       DateTime?         @map("start_date")
+  finishDate      DateTime?         @map("finish_date")
+  lastRead        Int?              @map("last_read")
+  progress        Int?
+  rating          Int?
+  review          String?
+  createdAt       DateTime          @default(now()) @map("created_at")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
+  user            User              @relation(fields: [userId], references: [id])
+  book            Book              @relation(fields: [bookId], references: [id])
+  readingSessions ReadingSession[]
+
+  @@unique([userId, bookId])
+  @@map("user_books")
+}
+
+model ReadingSession {
+  id           String    @id @default(uuid())
+  userBookId   String    @map("user_book_id")
+  startTime    DateTime  @map("start_time")
+  endTime      DateTime? @map("end_time")
+  pagesRead    Int?      @map("pages_read")
+  notes        String?
+  createdAt    DateTime  @default(now()) @map("created_at")
+  userBook     UserBook  @relation(fields: [userBookId], references: [id])
+
+  @@map("reading_sessions")
+}
+
+enum Role {
   USER
+  ADMIN
 }

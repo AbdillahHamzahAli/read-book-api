@@ -7,7 +7,7 @@ export const SECRET_KEY: Secret = MYENV.JWT_SCRET;
 
 interface JwtPayload {
   role: string;
-  id: number;
+  id: string;
 }
 
 export const authMiddleware = (
