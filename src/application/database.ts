@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Prisma } from "@prisma/client";
 import { logger } from "./logging";
 
 export const prismaClient = new PrismaClient({
@@ -37,3 +37,15 @@ prismaClient.$on("info", (e) => {
 prismaClient.$on("query", (e) => {
   logger.debug(e);
 });
+
+export type PrismaTransactionClient = Omit<
+  Prisma.TransactionClient,
+  | "$on"
+  | "$connect"
+  | "$disconnect"
+  | "$use"
+  | "$executeRaw"
+  | "$queryRaw"
+  | "$transaction"
+  | "$extends"
+>;

@@ -27,12 +27,12 @@ model Book {
   author          String
   coverImageUrl   String?     @map("cover_image_url")
   totalPages      Int?        @map("total_pages")
-  isbn            String?     @unique
   publishedDate   DateTime?   @map("published_date")
   genre           String?
   description     String?
   createdAt       DateTime    @default(now()) @map("created_at")
   updatedAt       DateTime    @updatedAt @map("updated_at")
+  deletedAt       DateTime?   @map("deleted_at")
   userBooks       UserBook[]
 
   @@map("books")
@@ -42,7 +42,6 @@ model UserBook {
   id              String            @id @default(uuid())
   userId          String            @map("user_id")
   bookId          String            @map("book_id")
-  status          String            @default("unread")
   startDate       DateTime?         @map("start_date")
   finishDate      DateTime?         @map("finish_date")
   lastRead        Int?              @map("last_read")
