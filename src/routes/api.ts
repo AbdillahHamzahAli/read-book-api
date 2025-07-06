@@ -7,4 +7,4 @@ export const apiRouter = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
 apiRouter.use(authMiddleware);
-apiRouter.post("/books", BookController.create);
+apiRouter.post("/books", upload.single("cover"), BookController.create);

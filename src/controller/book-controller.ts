@@ -8,8 +8,9 @@ export class BookController {
     try {
       const request: AddBookRequest = req.body as AddBookRequest;
       request.user_id = req.user!.id;
+      request.total_pages = parseInt(request.total_pages as any, 10);
 
-      const data = await BookService.addBook(request);
+      const data = await BookService.addBook(request, req.file);
 
       res.status(201).json({
         status: "success",

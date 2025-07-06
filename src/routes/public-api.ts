@@ -11,6 +11,6 @@ publicRouter.post("/user/login", UserController.login);
 
 publicRouter.post(
   "/analyze-image",
-  upload.single("imageFile"),
+  upload.single("cover"),
   handleImageAnalysis
 );
