@@ -50,4 +50,12 @@ export class BookService {
       throw e;
     }
   }
+
+  static async getAllBooks(userId: string): Promise<BookResponse[]> {
+    const uow = new UnitOfWork();
+    return uow.execute(async (tx) => {
+      const books = await tx.userBookRepository.findByUserId(userId);
+      return books.map((item) => toBookResponse(item.book));
+    });
+  }
 }

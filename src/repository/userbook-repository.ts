@@ -20,6 +20,15 @@ export class UserBookRepository {
     });
   }
 
+  async findByUserId(userId: string) {
+    return await this.prisma.userBook.findMany({
+      where: { userId },
+      include: {
+        book: true,
+      },
+    });
+  }
+
   async findByUserIdAndTitle(
     userId: string,
     title: string

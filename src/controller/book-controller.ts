@@ -22,4 +22,20 @@ export class BookController {
       next(e);
     }
   }
+
+  static async getAll(req: UserRequest, res: Response, next: NextFunction) {
+    try {
+      const userId = req.user!.id;
+      const books = await BookService.getAllBooks(userId);
+
+      res.status(200).json({
+        status: "success",
+        data: {
+          books,
+        },
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
 }
