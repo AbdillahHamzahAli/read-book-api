@@ -33,7 +33,7 @@ model Book {
   createdAt       DateTime    @default(now()) @map("created_at")
   updatedAt       DateTime    @updatedAt @map("updated_at")
   deletedAt       DateTime?   @map("deleted_at")
-  userBooks       UserBook[]
+  userBooks       UserBook?
 
   @@map("books")
 }
@@ -41,7 +41,7 @@ model Book {
 model UserBook {
   id              String            @id @default(uuid())
   userId          String            @map("user_id")
-  bookId          String            @map("book_id")
+  bookId          String            @map("book_id") @unique
   startDate       DateTime?         @map("start_date")
   finishDate      DateTime?         @map("finish_date")
   lastRead        Int?              @map("last_read")
