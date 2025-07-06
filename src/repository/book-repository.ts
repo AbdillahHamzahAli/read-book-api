@@ -1,6 +1,6 @@
 import { Book } from "@prisma/client";
 import { PrismaTransactionClient } from "../application/database";
-import { AddBookRequest } from "../model/book-model";
+import { addBookRequest } from "../model/book-model";
 
 export class BookRepository {
   private readonly prisma: PrismaTransactionClient;
@@ -8,7 +8,7 @@ export class BookRepository {
   constructor(prisma: PrismaTransactionClient) {
     this.prisma = prisma;
   }
-  async create(data: AddBookRequest): Promise<Book> {
+  async create(data: addBookRequest): Promise<Book> {
     return await this.prisma.book.create({
       data: {
         title: data.title,

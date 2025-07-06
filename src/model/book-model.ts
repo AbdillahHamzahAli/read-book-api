@@ -1,6 +1,6 @@
 import { Book } from "@prisma/client";
 
-export type AddBookRequest = {
+export type addBookRequest = {
   title: string;
   author: string;
   cover_image_url?: string;
@@ -20,6 +20,12 @@ export type BookResponse = {
   published_date: Date | null;
   genre: string | null;
   description: string | null;
+};
+
+export type searchBookRequest = {
+  title?: string;
+  page: number;
+  size: number;
 };
 
 export function toBookResponse(book: Book): BookResponse {

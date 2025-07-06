@@ -1,12 +1,13 @@
 import { NextFunction, Request, Response } from "express";
-import { AddBookRequest } from "../model/book-model";
+import { addBookRequest, searchBookRequest } from "../model/book-model";
 import { UserRequest } from "../type/user-request";
 import { BookService } from "../service/book-service";
+import { User } from "@prisma/client";
 
 export class BookController {
   static async create(req: UserRequest, res: Response, next: NextFunction) {
     try {
-      const request: AddBookRequest = req.body as AddBookRequest;
+      const request: addBookRequest = req.body as addBookRequest;
       request.user_id = req.user!.id;
       request.total_pages = parseInt(request.total_pages as any, 10);
 
@@ -27,6 +28,27 @@ export class BookController {
     try {
       const userId = req.user!.id;
       const books = await BookService.getAllBooks(userId);
+
+      res.status(200).json({
+        status: "success",
+        data: {
+          books,
+        },
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  static async search(req: UserRequest, res: Response, next: NextFunction) {
+    try {
+      const request: searchBookRequest = {
+        title: req.query.title as string,
+        page: req.query.page ? Number(req.query.page) : 1,
+        size: req.query.size ? Number(req.query.size) : 10,
+      };
+
+      const books = await BookService.searchBooks(request, req.user!.id);
 
       res.status(200).json({
         status: "success",

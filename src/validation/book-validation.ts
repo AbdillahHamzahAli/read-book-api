@@ -11,4 +11,10 @@ export class BookValidation {
     description: z.string().optional(),
     user_id: z.string().min(1),
   });
+
+  static readonly SEARCHBOOK: ZodType = z.object({
+    title: z.string().min(1).optional(),
+    page: z.number().int().positive().default(1),
+    size: z.number().int().positive().default(10),
+  });
 }

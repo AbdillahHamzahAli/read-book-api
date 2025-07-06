@@ -9,3 +9,4 @@ const upload = multer({ storage: multer.memoryStorage() });
 apiRouter.use(authMiddleware);
 apiRouter.post("/books", upload.single("cover"), BookController.create);
 apiRouter.get("/books", BookController.getAll);
+apiRouter.get("/books/search", BookController.search);

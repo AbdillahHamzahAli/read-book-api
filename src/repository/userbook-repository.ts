@@ -1,10 +1,15 @@
-import { UserBook } from "@prisma/client";
+import { Book, Prisma, UserBook } from "@prisma/client";
 import { PrismaTransactionClient } from "../application/database";
 import { CreateUserBook } from "../model/userbook-model";
 
+type UserBookWithBook = Prisma.UserBookGetPayload<{
+  include: {
+    book: true;
+  };
+}>;
+
 export class UserBookRepository {
   private readonly prisma: PrismaTransactionClient;
-
   constructor(prisma: PrismaTransactionClient) {
     this.prisma = prisma;
   }
@@ -20,7 +25,7 @@ export class UserBookRepository {
     });
   }
 
-  async findByUserId(userId: string) {
+  async findByUserId(userId: string): Promise<UserBookWithBook[]> {
     return await this.prisma.userBook.findMany({
       where: { userId },
       include: {
@@ -47,5 +52,37 @@ export class UserBookRepository {
         book: true,
       },
     });
+  }
+
+  async searchAndCount(
+    userId: string,
+    title: string | undefined,
+    take: number,
+    skip: number
+  ): Promise<[UserBookWithBook[], number]> {
+    const whereClause: Prisma.UserBookWhereInput = {
+      userId: userId,
+    };
+
+    if (title) {
+      whereClause.book = {
+        title: {
+          contains: title,
+          mode: "insensitive",
+        },
+      };
+    }
+
+    const [userBooks, total] = await Promise.all([
+      this.prisma.userBook.findMany({
+        where: whereClause,
+        include: { book: true },
+        take,
+        skip,
+      }),
+      this.prisma.userBook.count({ where: whereClause }),
+    ]);
+
+    return [userBooks, total];
   }
 }

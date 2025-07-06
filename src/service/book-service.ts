@@ -1,6 +1,7 @@
 import {
-  AddBookRequest,
+  addBookRequest,
   BookResponse,
+  searchBookRequest,
   toBookResponse,
 } from "../model/book-model";
 import { Validation } from "../validation/validation";
@@ -8,10 +9,12 @@ import { BookValidation } from "../validation/book-validation";
 import { ResponseError } from "../error/response-error";
 import { UnitOfWork } from "../application/unit-of-work";
 import { StorageService } from "../utils/s3-storage/storage-service";
+import { Pageable } from "../model/page";
+import { Prisma } from "@prisma/client";
 
 export class BookService {
   static async addBook(
-    request: AddBookRequest,
+    request: addBookRequest,
     file: Express.Multer.File | undefined
   ): Promise<BookResponse> {
     const uow = new UnitOfWork();
@@ -57,5 +60,33 @@ export class BookService {
       const books = await tx.userBookRepository.findByUserId(userId);
       return books.map((item) => toBookResponse(item.book));
     });
+  }
+
+  static async searchBooks(
+    request: searchBookRequest,
+    userId: string
+  ): Promise<Pageable<BookResponse>> {
+    const searchRequest = Validation.validate(
+      BookValidation.SEARCHBOOK,
+      request
+    );
+    const uow = new UnitOfWork();
+    const skip = (searchRequest.page - 1) * searchRequest.size;
+
+    const [userBooks, total] = await uow.userBookRepository.searchAndCount(
+      userId,
+      searchRequest.title,
+      searchRequest.size,
+      skip
+    );
+
+    return {
+      data: userBooks.map((userBook) => toBookResponse(userBook.book!)),
+      paging: {
+        current_page: searchRequest.page,
+        size: searchRequest.size,
+        total_page: Math.ceil(total / searchRequest.size),
+      },
+    };
   }
 }
