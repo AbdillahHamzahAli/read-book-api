@@ -12,6 +12,7 @@ export class BookController {
   static async create(req: UserRequest, res: Response, next: NextFunction) {
     try {
       const request: addBookRequest = req.body as addBookRequest;
+      request.cover_image_url = undefined;
       request.user_id = req.user!.id;
       request.total_pages = parseInt(request.total_pages as any, 10);
 
@@ -68,6 +69,7 @@ export class BookController {
   static async update(req: UserRequest, res: Response, next: NextFunction) {
     try {
       const request: updateBookRequest = req.body as updateBookRequest;
+      request.cover_image_url = undefined;
       request.id = req.params.id;
       request.total_pages = parseInt(request.total_pages as any, 10);
 
