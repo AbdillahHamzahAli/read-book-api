@@ -3,6 +3,7 @@ import {
   BookResponse,
   searchBookRequest,
   toBookResponse,
+  updateBookRequest,
 } from "../model/book-model";
 import { Validation } from "../validation/validation";
 import { BookValidation } from "../validation/book-validation";
@@ -34,6 +35,7 @@ export class BookService {
             addBookRequest.user_id,
             addBookRequest.title
           );
+
         if (isUserBookExists) {
           throw new ResponseError(409, "A book with this title already exists");
         }
@@ -88,5 +90,54 @@ export class BookService {
         total_page: Math.ceil(total / searchRequest.size),
       },
     };
+  }
+
+  static async updateBook(
+    request: updateBookRequest,
+    file: Express.Multer.File | undefined,
+    userId: string
+  ): Promise<BookResponse> {
+    const uow = new UnitOfWork();
+    const updateBookRequest = Validation.validate(
+      BookValidation.UPDATEBOOK,
+      request
+    );
+
+    let storageInfo: { url: string; key: string } | null = null;
+
+    if (file) {
+      storageInfo = await StorageService.upload(file);
+      updateBookRequest.cover_image_url = storageInfo.url;
+    }
+
+    return uow.execute(async (tx) => {
+      const book = await tx.bookRepository.findById(updateBookRequest.id);
+      if (!book) {
+        throw new ResponseError(404, "Book not found");
+      }
+
+      const isUserBookExists = await tx.userBookRepository.findByUserIdAndTitle(
+        updateBookRequest.id,
+        userId
+      );
+      if (isUserBookExists && isUserBookExists.bookId !== book.id) {
+        throw new ResponseError(409, "A book with this title already exists");
+      }
+
+      const updatedBook = await tx.bookRepository.update(
+        updateBookRequest.id,
+        updateBookRequest
+      );
+
+      if (storageInfo && book.coverImageUrl) {
+        const key = book.coverImageUrl.replace(
+          "https://yztinhcgnrkiugkbqazc.supabase.co/storage/v1/object/public/cover/",
+          ""
+        );
+        await StorageService.delete(key);
+      }
+
+      return toBookResponse(updatedBook);
+    });
   }
 }

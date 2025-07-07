@@ -1,5 +1,9 @@
 import { NextFunction, Request, Response } from "express";
-import { addBookRequest, searchBookRequest } from "../model/book-model";
+import {
+  addBookRequest,
+  searchBookRequest,
+  updateBookRequest,
+} from "../model/book-model";
 import { UserRequest } from "../type/user-request";
 import { BookService } from "../service/book-service";
 import { User } from "@prisma/client";
@@ -54,6 +58,28 @@ export class BookController {
         status: "success",
         data: {
           books,
+        },
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  static async update(req: UserRequest, res: Response, next: NextFunction) {
+    try {
+      const request: updateBookRequest = req.body as updateBookRequest;
+      request.id = req.params.id;
+      request.total_pages = parseInt(request.total_pages as any, 10);
+
+      const respose = await BookService.updateBook(
+        request,
+        req.file,
+        req.user!.id
+      );
+      res.status(200).json({
+        status: "success",
+        data: {
+          book: respose,
         },
       });
     } catch (e) {

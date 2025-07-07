@@ -28,6 +28,17 @@ export type searchBookRequest = {
   size: number;
 };
 
+export type updateBookRequest = {
+  id: string;
+  title?: string;
+  author?: string;
+  cover_image_url?: string;
+  total_pages?: number;
+  published_date?: Date;
+  genre?: string;
+  description?: string;
+};
+
 export function toBookResponse(book: Book): BookResponse {
   return {
     id: book.id,
