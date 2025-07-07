@@ -140,4 +140,37 @@ export class BookService {
       return toBookResponse(updatedBook);
     });
   }
+
+  static async deleteBook(bookId: string, userId: string): Promise<void> {
+    const uow = new UnitOfWork();
+    return uow.execute(async (tx) => {
+      const book = await tx.bookRepository.findById(bookId);
+      if (!book) {
+        throw new ResponseError(404, "Book not found");
+      }
+
+      const userBook = await tx.userBookRepository.findByUserIdAndBookId(
+        userId,
+        bookId
+      );
+
+      if (!userBook) {
+        throw new ResponseError(
+          403,
+          "You do not have permission to delete this book"
+        );
+      }
+
+      await tx.userBookRepository.deleteById(userBook.id);
+      await tx.bookRepository.deleteById(book.id);
+
+      if (book.coverImageUrl) {
+        const key = book.coverImageUrl.replace(
+          "https://yztinhcgnrkiugkbqazc.supabase.co/storage/v1/object/public/cover/",
+          ""
+        );
+        await StorageService.delete(key);
+      }
+    });
+  }
 }

@@ -6,13 +6,11 @@ import {
 } from "../model/book-model";
 import { UserRequest } from "../type/user-request";
 import { BookService } from "../service/book-service";
-import { User } from "@prisma/client";
 
 export class BookController {
   static async create(req: UserRequest, res: Response, next: NextFunction) {
     try {
       const request: addBookRequest = req.body as addBookRequest;
-      request.cover_image_url = undefined;
       request.user_id = req.user!.id;
       request.total_pages = parseInt(request.total_pages as any, 10);
 
@@ -83,6 +81,22 @@ export class BookController {
         data: {
           book: respose,
         },
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  static async delete(req: UserRequest, res: Response, next: NextFunction) {
+    try {
+      const bookId = req.params.id;
+      const userId = req.user!.id;
+
+      await BookService.deleteBook(bookId, userId);
+
+      res.status(200).json({
+        status: "success",
+        message: "Book deleted successfully",
       });
     } catch (e) {
       next(e);

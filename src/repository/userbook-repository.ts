@@ -85,4 +85,22 @@ export class UserBookRepository {
 
     return [userBooks, total];
   }
+
+  async findByUserIdAndBookId(
+    userId: string,
+    bookId: string
+  ): Promise<UserBook | null> {
+    return await this.prisma.userBook.findFirst({
+      where: {
+        userId,
+        bookId,
+      },
+    });
+  }
+
+  async deleteById(id: string): Promise<UserBook> {
+    return await this.prisma.userBook.delete({
+      where: { id },
+    });
+  }
 }

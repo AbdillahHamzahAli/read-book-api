@@ -57,4 +57,10 @@ export class BookRepository {
       where: { id },
     });
   }
+
+  async deleteById(id: string): Promise<Book> {
+    return await this.prisma.book.delete({
+      where: { id },
+    });
+  }
 }
