@@ -24,30 +24,23 @@ export class BookRepository {
     });
   }
 
-  async update(id: string, data: updateBookRequest): Promise<Book> {
+  async update(data: updateBookRequest): Promise<Book> {
+    console.log("updateBookRequest-------------");
     return await this.prisma.book.update({
-      where: { id },
+      where: { id: data.id },
       data: {
         title: data.title,
         author: data.author,
         coverImageUrl: data.cover_image_url,
         totalPages: data.total_pages,
-        publishedDate: data.published_date
-          ? new Date(data.published_date)
-          : null,
+        publishedDate:
+          data.published_date !== undefined
+            ? data.published_date
+              ? new Date(data.published_date)
+              : null
+            : undefined,
         genre: data.genre,
         description: data.description,
-      },
-    });
-  }
-
-  async findByTitle(title: string): Promise<Book | null> {
-    return await this.prisma.book.findFirst({
-      where: {
-        title: {
-          equals: title.replace(/\s+/g, "").toLowerCase(),
-          mode: "insensitive",
-        },
       },
     });
   }

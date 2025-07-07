@@ -116,18 +116,29 @@ export class BookService {
         throw new ResponseError(404, "Book not found");
       }
 
-      const isUserBookExists = await tx.userBookRepository.findByUserIdAndTitle(
-        updateBookRequest.id,
-        userId
+      const isUserBookExists =
+        await tx.userBookRepository.findByUserIdAndBookId(
+          userId,
+          updateBookRequest.id
+        );
+
+      if (!isUserBookExists) {
+        throw new ResponseError(
+          403,
+          "You do not have permission to update this book"
+        );
+      }
+
+      const isDuplicate = await tx.userBookRepository.findByUserIdAndTitle(
+        userId,
+        updateBookRequest.title
       );
-      if (isUserBookExists && isUserBookExists.bookId !== book.id) {
+
+      if (isDuplicate && isDuplicate.bookId !== book.id) {
         throw new ResponseError(409, "A book with this title already exists");
       }
 
-      const updatedBook = await tx.bookRepository.update(
-        updateBookRequest.id,
-        updateBookRequest
-      );
+      const updatedBook = await tx.bookRepository.update(updateBookRequest);
 
       if (storageInfo && book.coverImageUrl) {
         const key = book.coverImageUrl.replace(

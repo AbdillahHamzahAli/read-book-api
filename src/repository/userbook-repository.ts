@@ -43,7 +43,7 @@ export class UserBookRepository {
         userId,
         book: {
           title: {
-            equals: title.replace(/\s+/g, "").toLowerCase(),
+            contains: title,
             mode: "insensitive",
           },
         },

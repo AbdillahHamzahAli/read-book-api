@@ -12,6 +12,7 @@ export class BookController {
     try {
       const request: addBookRequest = req.body as addBookRequest;
       request.user_id = req.user!.id;
+      request.cover_image_url = undefined;
       request.total_pages = parseInt(request.total_pages as any, 10);
 
       const data = await BookService.addBook(request, req.file);
