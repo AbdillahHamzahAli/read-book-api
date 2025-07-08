@@ -1,6 +1,10 @@
-import { createReadingSessionRequest } from "../model/reading-session-model";
+import {
+  createReadingSessionRequest,
+  updateReadingSessionRequest,
+} from "../model/reading-session-model";
 import { PrismaTransactionClient } from "../application/database";
 import { ReadingSession } from "@prisma/client";
+import { updateBookRequest } from "../model/book-model";
 
 export class ReadingSessionRepository {
   private readonly prisma: PrismaTransactionClient;
@@ -30,6 +34,24 @@ export class ReadingSessionRepository {
     return this.prisma.readingSession.findMany({
       where: { userBookId },
       orderBy: { createdAt: "desc" },
+    });
+  }
+
+  async updateNotes(
+    data: updateReadingSessionRequest,
+    id: string
+  ): Promise<ReadingSession> {
+    return this.prisma.readingSession.update({
+      where: { id },
+      data: {
+        notes: data.notes,
+      },
+    });
+  }
+
+  async delete(id: string): Promise<ReadingSession> {
+    return this.prisma.readingSession.delete({
+      where: { id },
     });
   }
 }

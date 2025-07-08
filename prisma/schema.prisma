@@ -44,8 +44,8 @@ model UserBook {
   bookId          String            @map("book_id") @unique
   startDate       DateTime?         @map("start_date")
   finishDate      DateTime?         @map("finish_date")
-  lastRead        Int?              @map("last_read")
-  progress        Int?
+  lastRead        Int               @default(0) @map("last_read")
+  progress        Int               @default(0)
   rating          Int?
   review          String?
   createdAt       DateTime          @default(now()) @map("created_at")

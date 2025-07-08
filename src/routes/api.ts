@@ -24,3 +24,11 @@ apiRouter.get(
   "/reading-session/:idUserBook/detail/:idSession",
   ReadingSessionController.getDetails
 );
+apiRouter.put(
+  "/reading-session/:idUserBook/detail/:idSession",
+  ReadingSessionController.update
+);
+apiRouter.delete(
+  "/reading-session/:idUserBook/detail/:idSession",
+  ReadingSessionController.delete
+);

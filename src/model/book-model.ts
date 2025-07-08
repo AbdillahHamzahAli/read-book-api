@@ -4,7 +4,7 @@ export type addBookRequest = {
   title: string;
   author: string;
   cover_image_url?: string;
-  total_pages?: number;
+  total_pages: number;
   published_date?: Date;
   genre?: string;
   description?: string;

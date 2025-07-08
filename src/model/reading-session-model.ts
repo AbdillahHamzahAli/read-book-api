@@ -17,6 +17,10 @@ export type readingSessionResponse = {
   notes: string | null;
 };
 
+export type updateReadingSessionRequest = {
+  notes?: string;
+};
+
 export function toReadingSessionResponse(
   data: ReadingSession
 ): readingSessionResponse {
