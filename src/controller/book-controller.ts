@@ -105,4 +105,20 @@ export class BookController {
       next(e);
     }
   }
+
+  static async getById(req: UserRequest, res: Response, next: NextFunction) {
+    try {
+      const bookId = req.params.id;
+      const userId = req.user!.id;
+
+      const response = await BookService.getBookById(bookId, userId);
+
+      res.status(200).json({
+        status: "success",
+        data: response,
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
 }

@@ -11,7 +11,7 @@ import { ResponseError } from "../error/response-error";
 import { UnitOfWork } from "../application/unit-of-work";
 import { StorageService } from "../utils/s3-storage/storage-service";
 import { Pageable } from "../model/page";
-import { Prisma } from "@prisma/client";
+import { Prisma, UserBook } from "@prisma/client";
 
 export class BookService {
   static async addBook(
@@ -90,6 +90,39 @@ export class BookService {
         total_page: Math.ceil(total / searchRequest.size),
       },
     };
+  }
+
+  static async getBookById(
+    bookId: string,
+    userId: string
+  ): Promise<{
+    book: BookResponse;
+    userBook: UserBook | null;
+  }> {
+    const uow = new UnitOfWork();
+    return uow.execute(async (tx) => {
+      const book = await tx.bookRepository.findById(bookId);
+      if (!book) {
+        throw new ResponseError(404, "Book not found");
+      }
+
+      const userBook = await tx.userBookRepository.findByUserIdAndBookId(
+        userId,
+        bookId
+      );
+
+      if (!userBook) {
+        throw new ResponseError(
+          403,
+          "You do not have permission to access this book"
+        );
+      }
+
+      return {
+        book: toBookResponse(book),
+        userBook: { ...userBook },
+      };
+    });
   }
 
   static async updateBook(
