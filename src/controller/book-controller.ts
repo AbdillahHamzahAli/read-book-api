@@ -70,7 +70,9 @@ export class BookController {
       const request: updateBookRequest = req.body as updateBookRequest;
       request.cover_image_url = undefined;
       request.id = req.params.id;
-      request.total_pages = parseInt(request.total_pages as any, 10);
+      if (request.total_pages) {
+        request.total_pages = parseInt(request.total_pages as any, 10);
+      }
 
       const respose = await BookService.updateBook(
         request,

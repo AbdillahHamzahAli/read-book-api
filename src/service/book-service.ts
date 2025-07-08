@@ -129,13 +129,15 @@ export class BookService {
         );
       }
 
-      const isDuplicate = await tx.userBookRepository.findByUserIdAndTitle(
-        userId,
-        updateBookRequest.title
-      );
+      if (updateBookRequest.title) {
+        const isDuplicate = await tx.userBookRepository.findByUserIdAndTitle(
+          userId,
+          updateBookRequest.title
+        );
 
-      if (isDuplicate && isDuplicate.bookId !== book.id) {
-        throw new ResponseError(409, "A book with this title already exists");
+        if (isDuplicate && isDuplicate.bookId !== book.id) {
+          throw new ResponseError(409, "A book with this title already exists");
+        }
       }
 
       const updatedBook = await tx.bookRepository.update(updateBookRequest);

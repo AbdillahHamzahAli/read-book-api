@@ -25,7 +25,6 @@ export class BookRepository {
   }
 
   async update(data: updateBookRequest): Promise<Book> {
-    // console.log("updateBookRequest-------------");
     return await this.prisma.book.update({
       where: { id: data.id },
       data: {
