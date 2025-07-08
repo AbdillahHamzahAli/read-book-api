@@ -103,4 +103,23 @@ export class UserBookRepository {
       where: { id },
     });
   }
+
+  async findByIdAndUserId(
+    id: string,
+    userId: string
+  ): Promise<UserBook | null> {
+    return await this.prisma.userBook.findUnique({
+      where: { id, userId },
+    });
+  }
+
+  async updateProgress(
+    userBookId: string,
+    progress: number
+  ): Promise<UserBook> {
+    return await this.prisma.userBook.update({
+      where: { id: userBookId },
+      data: { progress: { increment: progress } },
+    });
+  }
 }

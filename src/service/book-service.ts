@@ -97,7 +97,7 @@ export class BookService {
     userId: string
   ): Promise<{
     book: BookResponse;
-    userBook: UserBook | null;
+    user_book: UserBook | null;
   }> {
     const uow = new UnitOfWork();
     return uow.execute(async (tx) => {
@@ -120,7 +120,7 @@ export class BookService {
 
       return {
         book: toBookResponse(book),
-        userBook: { ...userBook },
+        user_book: { ...userBook },
       };
     });
   }
