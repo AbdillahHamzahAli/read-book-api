@@ -32,29 +32,35 @@ model Book {
   description     String?
   createdAt       DateTime    @default(now()) @map("created_at")
   updatedAt       DateTime    @updatedAt @map("updated_at")
-  deletedAt       DateTime?   @map("deleted_at")
-  userBooks       UserBook?
 
   @@map("books")
 }
 
 model UserBook {
-  id              String            @id @default(uuid())
-  userId          String            @map("user_id")
-  bookId          String            @map("book_id") @unique
-  startDate       DateTime?         @map("start_date")
-  finishDate      DateTime?         @map("finish_date")
-  lastRead        Int               @default(0) @map("last_read")
-  progress        Int               @default(0)
+  id              String    @id @default(uuid())
+  userId          String    @map("user_id")
+  bookTitle       String    @map("book_title")
+  bookAuthor      String    @map("book_author")
+  bookCoverUrl    String?   @map("book_cover_url")
+  bookTotalPages  Int?      @map("book_total_pages")
+  bookPublishedDate DateTime? @map("book_published_date")
+  bookGenre       String?   @map("book_genre")
+  bookDescription String?   @map("book_description")
+
+  startDate       DateTime? @map("start_date")
+  finishDate      DateTime? @map("finish_date")
+  lastRead        Int       @default(0) @map("last_read")
+  progress        Int       @default(0)
   rating          Int?
   review          String?
-  createdAt       DateTime          @default(now()) @map("created_at")
-  updatedAt       DateTime          @updatedAt @map("updated_at")
-  user            User              @relation(fields: [userId], references: [id])
-  book            Book              @relation(fields: [bookId], references: [id])
+
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  user            User      @relation(fields: [userId], references: [id])
   readingSessions ReadingSession[]
 
-  @@unique([userId, bookId])
+  @@unique([userId, bookTitle, bookAuthor]) 
   @@map("user_books")
 }
 
