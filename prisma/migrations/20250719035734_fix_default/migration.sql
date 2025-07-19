@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "user_books" ALTER COLUMN "start_date" SET DEFAULT CURRENT_TIMESTAMP;

@@ -4,7 +4,6 @@ import {
 } from "../model/reading-session-model";
 import { PrismaTransactionClient } from "../application/database";
 import { ReadingSession } from "@prisma/client";
-import { updateBookRequest } from "../model/book-model";
 
 export class ReadingSessionRepository {
   private readonly prisma: PrismaTransactionClient;
@@ -24,6 +23,16 @@ export class ReadingSessionRepository {
     });
   }
 
+  async getTotalPagesRead(userBookId: string): Promise<number> {
+    const result = await this.prisma.readingSession.aggregate({
+      where: { userBookId },
+      _sum: {
+        pagesRead: true,
+      },
+    });
+    return result._sum.pagesRead || 0;
+  }
+
   async findById(id: string): Promise<ReadingSession | null> {
     return this.prisma.readingSession.findUnique({
       where: { id },
@@ -37,7 +46,7 @@ export class ReadingSessionRepository {
     });
   }
 
-  async updateNotes(
+  async update(
     data: updateReadingSessionRequest,
     id: string
   ): Promise<ReadingSession> {
@@ -45,6 +54,7 @@ export class ReadingSessionRepository {
       where: { id },
       data: {
         notes: data.notes,
+        pagesRead: data.pagesRead,
       },
     });
   }

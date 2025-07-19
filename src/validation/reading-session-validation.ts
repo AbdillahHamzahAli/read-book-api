@@ -14,5 +14,6 @@ export class ReadingSessionValidation {
 
   static readonly UPDATEREADSESSION = z.object({
     notes: z.string().optional(),
+    pagesRead: z.number().int().min(1).positive().optional(),
   });
 }

@@ -1,12 +1,6 @@
-import { Book, Prisma, UserBook } from "@prisma/client";
+import { UserBook } from "@prisma/client";
 import { PrismaTransactionClient } from "../application/database";
-import { CreateUserBook } from "../model/userbook-model";
-
-type UserBookWithBook = Prisma.UserBookGetPayload<{
-  include: {
-    book: true;
-  };
-}>;
+import { createUserBook } from "../model/userbook-model";
 
 export class UserBookRepository {
   private readonly prisma: PrismaTransactionClient;
@@ -14,117 +8,92 @@ export class UserBookRepository {
     this.prisma = prisma;
   }
 
-  async create(data: CreateUserBook): Promise<UserBook> {
-    return await this.prisma.userBook.create({
-      data: {
-        userId: data.userId,
-        bookId: data.bookId,
-        startDate: new Date(),
-        progress: 0,
-      },
-    });
-  }
-
-  async findByUserId(userId: string): Promise<UserBookWithBook[]> {
-    return await this.prisma.userBook.findMany({
-      where: { userId },
-      include: {
-        book: true,
-      },
-    });
-  }
-
-  async findByUserIdAndTitle(
-    userId: string,
-    title: string
+  async findByTitleAndUserId(
+    title: string,
+    userId: string
   ): Promise<UserBook | null> {
-    return await this.prisma.userBook.findFirst({
-      where: {
-        userId,
-        book: {
-          title: {
-            contains: title,
-            mode: "insensitive",
-          },
-        },
-      },
-      include: {
-        book: true,
-      },
+    return this.prisma.userBook.findFirst({
+      where: { userId, bookTitle: title },
+    });
+  }
+
+  async createUserBook(data: createUserBook): Promise<UserBook> {
+    return this.prisma.userBook.create({
+      data: data,
     });
   }
 
   async searchAndCount(
-    userId: string,
-    title: string | undefined,
-    take: number,
-    skip: number
-  ): Promise<[UserBookWithBook[], number]> {
-    const whereClause: Prisma.UserBookWhereInput = {
-      userId: userId,
-    };
-
-    if (title) {
-      whereClause.book = {
-        title: {
+    title: string = "",
+    skip: number,
+    size: number,
+    userId: string
+  ): Promise<{
+    data: UserBook[];
+    total: number;
+  }> {
+    if (title === "") {
+      title = "%%";
+    }
+    const total = await this.prisma.userBook.count({
+      where: {
+        userId,
+        bookTitle: {
+          contains: title,
+        },
+      },
+    });
+    const data = await this.prisma.userBook.findMany({
+      where: {
+        userId,
+        bookTitle: {
           contains: title,
           mode: "insensitive",
         },
-      };
-    }
-
-    const [userBooks, total] = await Promise.all([
-      this.prisma.userBook.findMany({
-        where: whereClause,
-        include: { book: true },
-        take,
-        skip,
-      }),
-      this.prisma.userBook.count({ where: whereClause }),
-    ]);
-
-    return [userBooks, total];
-  }
-
-  async findByUserIdAndBookId(
-    userId: string,
-    bookId: string
-  ): Promise<UserBook | null> {
-    return await this.prisma.userBook.findFirst({
-      where: {
-        userId,
-        bookId,
       },
+      skip,
+      take: size,
     });
-  }
-
-  async deleteById(id: string): Promise<UserBook> {
-    return await this.prisma.userBook.delete({
-      where: { id },
-    });
+    return { data, total };
   }
 
   async findByIdAndUserId(
     id: string,
     userId: string
-  ): Promise<UserBookWithBook | null> {
-    return await this.prisma.userBook.findUnique({
+  ): Promise<UserBook | null> {
+    return this.prisma.userBook.findFirst({
       where: { id, userId },
-      include: {
-        book: true,
-      },
+    });
+  }
+
+  async delete(id: string, userId: string): Promise<void> {
+    await this.prisma.userBook.delete({
+      where: { id, userId },
+    });
+  }
+
+  async update(
+    id: string,
+    userId: string,
+    data: Partial<UserBook>
+  ): Promise<UserBook> {
+    return this.prisma.userBook.update({
+      where: { id, userId },
+      data,
     });
   }
 
   async updateProgress(
-    userBookId: string,
-    lastRead: number,
+    id: string,
+    pagesRead: number,
     totalPages: number
   ): Promise<UserBook> {
-    const progress = totalPages > 0 ? (lastRead / totalPages) * 100 : 0;
-    return await this.prisma.userBook.update({
-      where: { id: userBookId },
-      data: { progress, lastRead },
+    return this.prisma.userBook.update({
+      where: { id },
+      data: {
+        lastRead: pagesRead,
+        progress: Math.floor((pagesRead / totalPages) * 100),
+      },
     });
   }
 }

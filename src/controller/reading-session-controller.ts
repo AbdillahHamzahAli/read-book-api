@@ -1,4 +1,3 @@
-import { updateBookRequest } from "../model/book-model";
 import {
   createReadingSessionRequest,
   updateReadingSessionRequest,
@@ -14,16 +13,14 @@ export class ReadingSessionController {
         req.body as createReadingSessionRequest;
       request.userBookId = req.params.idUserBook;
 
-      const data = await ReadingSessionService.createReadingSession(
+      const response = await ReadingSessionService.createReadingSession(
         request,
         req.user!.id
       );
 
       res.status(201).json({
         status: "success",
-        data: {
-          reading_session: data,
-        },
+        data: response,
       });
     } catch (e) {
       next(e);
@@ -45,9 +42,7 @@ export class ReadingSessionController {
 
       res.status(200).json({
         status: "success",
-        data: {
-          reading_sessions: data,
-        },
+        data,
       });
     } catch (e) {
       next(e);
@@ -107,7 +102,7 @@ export class ReadingSessionController {
 
       res.status(200).json({
         status: "success",
-        data: "deleted",
+        data: "OK",
       });
     } catch (e) {
       next(e);

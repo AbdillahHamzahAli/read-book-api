@@ -19,6 +19,7 @@ export type readingSessionResponse = {
 
 export type updateReadingSessionRequest = {
   notes?: string;
+  pagesRead?: number;
 };
 
 export function toReadingSessionResponse(

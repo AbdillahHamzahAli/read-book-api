@@ -26,17 +26,22 @@ export class ReadingSessionService {
       createRequest.userBookId,
       userId
     );
+
     if (!existsUserBook) throw new ResponseError(404, "User book not found");
 
     return uow.execute(async (tx) => {
-      const readingSession = await uow.readingSessionRepository.create(
+      const readingSession = await tx.readingSessionRepository.create(
         createRequest
+      );
+
+      const totalPageRead = await tx.readingSessionRepository.getTotalPagesRead(
+        createRequest.userBookId
       );
 
       await tx.userBookRepository.updateProgress(
         existsUserBook.id,
-        createRequest.pagesRead + (existsUserBook.lastRead ?? 0),
-        existsUserBook.book.totalPages ?? 0
+        totalPageRead,
+        existsUserBook.bookTotalPages
       );
 
       return toReadingSessionResponse(readingSession);
@@ -126,12 +131,23 @@ export class ReadingSessionService {
       );
     }
 
-    const updatedSession = await uow.readingSessionRepository.updateNotes(
-      updateRequest,
-      idSession
-    );
+    return uow.execute(async (tx) => {
+      const updatedSession = await uow.readingSessionRepository.update(
+        updateRequest,
+        idSession
+      );
 
-    return toReadingSessionResponse(updatedSession);
+      const totalPageRead =
+        await uow.readingSessionRepository.getTotalPagesRead(idUserBook);
+
+      await tx.userBookRepository.updateProgress(
+        existsUserBook.id,
+        totalPageRead,
+        existsUserBook.bookTotalPages
+      );
+
+      return toReadingSessionResponse(updatedSession);
+    });
   }
 
   static async delete(
@@ -164,13 +180,20 @@ export class ReadingSessionService {
       );
     }
 
-    await uow.readingSessionRepository.delete(idSession);
-    await uow.userBookRepository.updateProgress(
-      idUserBook,
-      (existsUserBook.lastRead ?? 0) - (readingSession.pagesRead ?? 0),
-      existsUserBook.book.totalPages ?? 0
-    );
+    uow.execute(async (tx) => {
+      await tx.readingSessionRepository.delete(idSession);
+      const totalPageRead = await tx.readingSessionRepository.getTotalPagesRead(
+        idUserBook
+      );
 
+      console.log(totalPageRead);
+
+      await tx.userBookRepository.updateProgress(
+        existsUserBook.id,
+        totalPageRead,
+        existsUserBook.bookTotalPages
+      );
+    });
     return;
   }
 }
