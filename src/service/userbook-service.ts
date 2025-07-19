@@ -122,6 +122,26 @@ export class UserBookService {
       if (!userBook) {
         throw new ResponseError(404, "User Book not found");
       }
+
+      if (updateRequest.bookTitle) {
+        const isTitleExists = await uow.userBookRepository.findByTitleAndUserId(
+          updateRequest.bookTitle,
+          updateRequest.userId
+        );
+
+        if (isTitleExists && isTitleExists.id !== id) {
+          throw new ResponseError(401, "Book title already exists");
+        }
+      }
+
+      if (updateRequest.bookTotalPages) {
+        await uow.userBookRepository.updateProgress(
+          id,
+          userBook.lastRead,
+          updateRequest.bookTotalPages
+        );
+      }
+
       const book = await uow.userBookRepository.update(
         id,
         request.userId,

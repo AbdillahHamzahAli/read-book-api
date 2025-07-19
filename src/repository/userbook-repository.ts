@@ -88,11 +88,12 @@ export class UserBookRepository {
     pagesRead: number,
     totalPages: number
   ): Promise<UserBook> {
+    const progress = Math.min(100, Math.floor((pagesRead / totalPages) * 100));
     return this.prisma.userBook.update({
       where: { id },
       data: {
         lastRead: pagesRead,
-        progress: Math.floor((pagesRead / totalPages) * 100),
+        progress,
       },
     });
   }
